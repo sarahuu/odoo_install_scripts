@@ -37,14 +37,8 @@ OE_SUPERADMIN="admin"
 # Set to "True" to generate a random password, "False" to use the variable in OE_SUPERADMIN
 GENERATE_RANDOM_PASSWORD="True"
 OE_CONFIG="${OE_USER}-server"
-# Set the website name
-WEBSITE_NAME="example.com"
 # Set the default Odoo longpolling port (you still have to use -c /etc/odoo-server.conf for example to use this.)
 LONGPOLLING_PORT="8072"
-# Set to "True" to install certbot and have ssl enabled, "False" to use http
-ENABLE_SSL="True"
-# Provide Email to register ssl certificate
-ADMIN_EMAIL="odoo@example.com"
 
 #--------------------------------------------------
 # Prompt for user-specific values
@@ -52,6 +46,7 @@ ADMIN_EMAIL="odoo@example.com"
 echo "Please provide the following information:"
 read -p "Enter the domain for this Odoo instance (e.g., odoo.yourcompany.com): " WEBSITE_NAME
 read -p "Enter your email address (for SSL certificate): " ADMIN_EMAIL
+read -p "Should SSL be enabled (True/False): " ENABLE_SSL
 
 #--------------------------------------------------
 # Update and upgrade the system
@@ -336,7 +331,7 @@ if [ $INSTALL_NGINX = "True" ] && [ $ENABLE_SSL = "True" ]  && [ $WEBSITE_NAME !
   sudo snap refresh core
   sudo snap install --classic certbot
   sudo ln -s /snap/bin/certbot /usr/bin/certbot
-  sudo certbot --nginx -d $WEBSITE_NAME 
+  sudo certbot --nginx -d $WEBSITE_NAME --email $ADMIN_EMAIL --agree-tos --no-eff-email --non-interactive
   sudo systemctl reload nginx  
   echo "============ SSL/HTTPS is enabled! ==========="
 else
