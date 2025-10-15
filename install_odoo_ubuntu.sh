@@ -29,7 +29,7 @@ OE_PORT="8069"
 # IMPORTANT! This script contains extra libraries that are specifically needed for Odoo 14.0
 OE_VERSION="18.0"
 # Installs postgreSQL V16 instead of defaults (e.g V16 for Ubuntu 24.04) - this improves performance
-INSTALL_POSTGRESQL_SIXTEEN="True"
+INSTALL_POSTGRESQL_SIXTEEN="False"
 # Set this to True if you want to install Nginx!
 INSTALL_NGINX="True"
 # Set the superadmin password - if GENERATE_RANDOM_PASSWORD is set to "True" we will automatically generate a random password, otherwise we use this one
@@ -45,6 +45,13 @@ LONGPOLLING_PORT="8072"
 ENABLE_SSL="True"
 # Provide Email to register ssl certificate
 ADMIN_EMAIL="odoo@example.com"
+
+#--------------------------------------------------
+# Prompt for user-specific values
+#--------------------------------------------------
+echo "Please provide the following information:"
+read -p "Enter the domain for this Odoo instance (e.g., odoo.yourcompany.com): " WEBSITE_NAME
+read -p "Enter your email address (for SSL certificate): " ADMIN_EMAIL
 
 #--------------------------------------------------
 # Update and upgrade the system
@@ -68,7 +75,7 @@ sudo systemctl restart sshd
 # Setting up the timezones
 #--------------------------------------------------
 # set the correct timezone on ubuntu
-timedatectl set-timezone Africa/Kigali
+timedatectl set-timezone Africa/Lagos
 timedatectl
 
 #--------------------------------------------------
@@ -146,7 +153,14 @@ sudo chown -R $OE_USER:$OE_USER /var/log/$OE_USER
 #--------------------------------------------------
 echo "=== Cloning Odoo 18 from GitHub ... ==="
 sudo git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $OE_HOME_EXT/
-sudo pip3 install -r /$OE_HOME_EXT/requirements.txt --break-system-packages
+
+# Create and activate Python 3.12 venv for Odoo
+cd $OE_HOME_EXT
+python3.12 -m venv venv
+
+# Upgrade pip & install Odoo requirements inside venv
+$OE_HOME_EXT/venv/bin/pip install --upgrade pip setuptools wheel
+$OE_HOME_EXT/venv/bin/pip install -r requirements.txt --break-system-packages
 
 # Create custom addons directory
 echo "Creating custom addons directory..."
@@ -154,7 +168,7 @@ sudo mkdir $OE_HOME/custom
 sudo mkdir $OE_HOME/custom/addons
 
 cd /usr/src/
-sudo git clone https://github.com/hrmuwanika/odooapps18.git
+sudo git clone https://github.com/sarahuu/odooapps18.git
 cp -rf odooapps18/* $OE_HOME/custom/addons
 
 echo "Creating enterprise addons directory..."
@@ -205,7 +219,7 @@ After=network.target
 Type=simple
 User=$OE_USER
 Group=$OE_USER
-ExecStart=$OE_HOME_EXT/odoo-bin --config /etc/${OE_CONFIG}.conf  --logfile /var/log/${OE_USER}/${OE_CONFIG}.log
+ExecStart=$OE_HOME_EXT/venv/bin/python $OE_HOME_EXT/odoo-bin --config /etc/${OE_CONFIG}.conf  --logfile /var/log/${OE_USER}/${OE_CONFIG}.log
 KillMode=mixed
 
 [Install]
