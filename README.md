@@ -40,3 +40,23 @@ The installation should take about 10 minutes to complete and then you will be a
 anywhere in the world by entering its ipaddress.
 
 For more information on hosting, upgrading to odoo enterprise, and changing your domain, contact me hrmuwanika@gmail.com
+
+# PROCESS FROM START TO FINISH
+### Set up python
+- For a new server, install python 3.12(for odoo 18)
+```
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.12 python3.12-venv python3.12-dev
+```
+### Set up postgres
+```
+sudo apt update
+sudo apt install curl ca-certificates software-properties-common apt-transport-https lsb-release -y
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+echo "deb [arch=amd64,arm64,ppc64el signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/postgresql.list
+sudo apt update
+sudo apt install postgresql-16 postgresql-contrib-16 -y
+sudo systemctl status postgresql
+```
+### Back to the beginning
